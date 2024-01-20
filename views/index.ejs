@@ -1,0 +1,88 @@
+<%- include('./includes/head.ejs') %>
+    <link rel="stylesheet" href="/css/main.css">
+</head>
+    <main>
+    <%- include('./includes/filter.ejs') %>
+<body>
+    <svg width="2000" height="1800"></svg>
+    <script>
+      const svg = d3.select('svg');
+      
+      const nodes = JSON.parse('<%- JSON.stringify(nodes) %>');
+      const links = JSON.parse('<%- JSON.stringify(links) %>');
+
+      const simulation = d3.forceSimulation()
+        .force('link', d3.forceLink().id(d => d.id))
+        .force('charge', d3.forceManyBody().strength(-1700))
+        .force('centerX', d3.forceX(svg.attr('width')/2))
+        .force('centerY', d3.forceY(svg.attr('height')/2))
+
+      const link = svg.append('g')
+        .attr('class', 'links')
+        .selectAll('line')
+        .data(links)
+        .enter().append('line')
+        .attr('class', 'link')
+
+        const node = svg.append('g')
+        .attr('class', 'nodes')
+        .selectAll('g')
+        .data(nodes)
+        .enter().append('g')
+        .attr('class', 'node'); 
+
+      node.append('rect') // Use rect elements for rectangles
+        .attr('width', 150) // Set width
+        .attr('height', 50) // Set height
+        .attr('rx', 5) // Add rounded corners for aesthetics
+        .attr('ry', 5);
+
+      node.append('text')
+        .attr('x', 15) // Center text horizontally
+        .attr('y', 17) // Adjust text position vertically
+        .text(d => d.name)
+      node.append('text').attr('x',15).attr('y',35).text(function(d) {
+        if(d.publicExposed === true) {
+            return "Exposed";
+          } else if(Object.keys(d).includes('vulnerabilities')) {
+            return 'Vulnerability';
+          } else if(d.kind === 'rds' || d.kind === 'sqs') {
+            return 'Sink'
+          }
+      }); // Use node name as text
+
+      simulation
+        .nodes(nodes)
+        .on('tick', ticked);
+
+      simulation.force('link')
+        .links(links);
+
+      function ticked() {
+        link
+          .attr('x1', d => d.source.x)
+          .attr('y1', d => d.source.y)
+          .attr('x2', d => d.target.x)
+          .attr('y2', d => d.target.y);
+
+          node.attr('transform', d => `translate(${d.x},${d.y})`);
+      } 
+
+      function updateNodeColors() {
+        node.select('rect').attr('fill', function(n) {
+          if(n.publicExposed === true) {
+            return "#4FF24F";
+          } else if(Object.keys(n).includes('vulnerabilities')) {
+            return '#F77272';
+          } else if(n.kind === 'rds' || n.kind === 'sqs') { 
+            return '#6291F8'
+          }
+        }); // Apply new color to rectangles
+      }
+
+      updateNodeColors();
+      
+
+ </script>
+    </main>
+<%- include('./includes/end.ejs') %>

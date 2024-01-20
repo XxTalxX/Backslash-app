@@ -1,0 +1,13 @@
+<%- include('../includes/head.ejs') %>
+    <link rel="stylesheet" href="/css/main.css">
+</head>
+<body>
+    <main>
+        <form id="submitForm" action="/submit" method="post">
+            <label><input type="checkbox" name="options" value="exposed"> Public Exposed </label><br>
+            <label><input type="checkbox" name="options" value="sink"> Sink </label><br>
+            <label><input type="checkbox" name="options" value="vulnerable"> Vulnerabilities </label><br>
+            <button type="submit">Submit</button>
+          </form>
+    </main>
+<%- include('../includes/end.ejs') %>
